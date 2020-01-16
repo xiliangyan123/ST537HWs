@@ -1,0 +1,26 @@
+---
+title: "Homework1"
+author: "Michael Yan"
+date: "1/16/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Xiliang Yan
+## Course: ST437/537
+## Homework 1
+## Date Due: January 23rd, 2020
+
+```{r cars}
+X = c(4,3,2,1)
+A = cbind(c(1,2,0,0), c(2,1,0,0), c(0,0,1,2), c(0,0,-2,-1))
+as.matrix(A)
+
+A %*% X
+```
+
+```{r pressure, echo=FALSE}
+```
