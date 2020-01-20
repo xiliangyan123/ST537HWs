@@ -20,7 +20,90 @@ A = cbind(c(1,2,0,0), c(2,1,0,0), c(0,0,1,2), c(0,0,-2,-1))
 as.matrix(A)
 
 A %*% X
+
+sigma <- cbind(c(3,0,2,2), c(0,1,1,0), c(2,1,9,-2), c(2,0,-2,4))
+#Covariance of AX
+covariance <- A %*% sigma %*% t(A) %>% print()
+#C). 
+rs_10 <- (sigma/10) %>% print()
 ```
 
-```{r pressure, echo=FALSE}
+
+```{r Q2, warning = FALSE, message = FALSE, echo = TRUE}
+# install.packages("HSAUR3")
+library(HSAUR3)
+# head(skulls)
+
+str(skulls)
+# The population is all of the skulls that have epoch c4000BC. 
+# The parameter is the population mean of all of the 4 variables that have skulls with epoch c4000BC. 
+# The sample is 50 observations of skulls that have epoch c4000Bc. 
+# The statistic is the sample mean of all the 4 variables that have skulls with epoch c4000Bc. 
+
+# b). estimate is the sample mean or xbar
+samp <- skulls[1:30, 2:5]
+xbar <- colMeans(samp)
+
+# C). estimate of is the sample covariance matrix or S
+S <- cov(samp) %>% round(3)
+
+# D). var-covar matrix of estimator of population mean 
+S.xbar <- S/(nrow(samp))
+
+# E). Estimate of parameter vector for difference in means 
+mb.bar <- mean(skulls[1:30, 2])
+bh.bar <- mean(skulls[1:30, 4])
+nh.bar <- mean(skulls[1:30, 5])
+
+# estimate of the vector is the vector of the differences in sample means. 
+est.vector <- c(mb.bar - nh.bar, bh.bar - nh.bar) 
+
+# estimate of the covariance matrix 
+A. <- rbind(c(1,0,0,-1), c(0,1,0,-1))
+S1.xbar <- A. %*% S.xbar %*% t(A.)
+```
+
+```{r Q3}
+#A). QQ plots for the individual variables
+par(mfrow=c(2,3))
+par(mfrow=c(2,2))
+qqnorm(skulls[1:30, 2])
+qqnorm(skulls[1:30, 3])
+qqnorm(skulls[1:30, 4])
+qqnorm(skulls[1:30, 5])
+
+#B). Chi-square plot 
+chisquare.plot <- function(x, mark) {
+  # x= a n x p data matrix, mark: number of
+  # extreme points to mark
+  # p=number of variables, n=sample size
+  p <- ncol(x)
+  n <- nrow(x)
+  # xbar and s
+  xbar <- colMeans(x)
+  s <- cov(x)
+  # Mahalanobis dist, sorted
+  x.cen <- scale(x, center = T, scale = F)
+  d2 <- diag(x.cen %*% solve(s) %*% t(x.cen))
+  sortd <- sort(d2)
+  # chi-sq quantiles
+  qchi <- qchisq((1:n - 0.5)/n, df = p)
+  # plot, mark points with heighest distance
+  plot(qchi, sortd, pch = 19, xlab = "Chi-square quantiles",
+  ylab = "Mahalanobis squared distances",
+    main = "Chi-square Q-Q Plot")
+    points(qchi[(n - mark + 1):n], sortd[(n - mark + 1):n], 
+           cex = 3, col = "#990000")
+}
+chisquare.plot(skulls[1:30, 2:5], mark = 2)
+#Because this isn't a formal test, we can say that the assumption of normality is reasonable. 
+#C). New dataset, add in z-scores
+
+zscores <- numeric()
+for(i in length(1:5)){
+  zscores[i] <- (skulls[1:30, i] - mean(skulls[1:30, i]))/(sd(skulls[1:30, i]))
+  zs <- zscores
+}
+
+#zscore1 <- (skulls[1:30,2] - mean(skulls[1:30, 2]))/sd(skulls[1:30, 2])
 ```
