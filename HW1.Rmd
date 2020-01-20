@@ -28,13 +28,13 @@ covariance <- A %*% sigma %*% t(A) %>% print()
 rs_10 <- (sigma/10) %>% print()
 ```
 
-
 ```{r Q2, warning = FALSE, message = FALSE, echo = TRUE}
 # install.packages("HSAUR3")
 library(HSAUR3)
 # head(skulls)
 
 str(skulls)
+
 # The population is all of the skulls that have epoch c4000BC. 
 # The parameter is the population mean of all of the 4 variables that have skulls with epoch c4000BC. 
 # The sample is 50 observations of skulls that have epoch c4000Bc. 
@@ -66,6 +66,7 @@ S1.xbar <- A. %*% S.xbar %*% t(A.)
 ```{r Q3}
 #A). QQ plots for the individual variables
 par(mfrow=c(2,3))
+
 par(mfrow=c(2,2))
 qqnorm(skulls[1:30, 2])
 qqnorm(skulls[1:30, 3])
@@ -95,11 +96,20 @@ chisquare.plot <- function(x, mark) {
     points(qchi[(n - mark + 1):n], sortd[(n - mark + 1):n], 
            cex = 3, col = "#990000")
 }
+
 chisquare.plot(skulls[1:30, 2:5], mark = 2)
 #Because this isn't a formal test, we can say that the assumption of normality is reasonable. 
 #C). New dataset, add in z-scores
 
 zscores <- numeric()
+
+chisquare.plot(skulls[1:30, 2:5], mark = 2)
+
+#Because this isn't a formal test, we can say that the assumption of normality is reasonable. 
+
+#C). New dataset, add in z-scores
+zscores <- numeric()
+
 for(i in length(1:5)){
   zscores[i] <- (skulls[1:30, i] - mean(skulls[1:30, i]))/(sd(skulls[1:30, i]))
   zs <- zscores
