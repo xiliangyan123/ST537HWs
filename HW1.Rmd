@@ -5,7 +5,7 @@ date: "1/16/2020"
 output: html_document
 ---
 
-```{r setup, include=TRUE}
+```{r setup, include=TRUE, echo = FALSE, message = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(warning = FALSE)
 knitr::opts_chunk$set(message = FALSE)
@@ -17,15 +17,9 @@ knitr::opts_chunk$set(library(mnormt))
 knitr::opts_chunk$set(library(car))
 ```
 
-## Xiliang Yan
-## Course: ST437/537
-## Homework 1
-## Date Due: January 23rd, 2020
-
 ```{r Q1}
 X = c(4,3,2,1)
 A = cbind(c(1,2,0,0), c(2,1,0,0), c(0,0,1,2), c(0,0,-2,-1))
-as.matrix(A)
 
 A %*% X
 
@@ -39,11 +33,6 @@ rs_10 <- (sigma/10) %>% print()
 ```
 
 ```{r Q2}
-# The population is all of the skulls that have epoch c4000BC. 
-# The parameter is the population mean of all of the 4 variables that have skulls with epoch c4000BC. 
-# The sample is 50 observations of skulls that have epoch c4000Bc. 
-# The statistic is the sample mean of all the 4 variables that have skulls with epoch c4000Bc. 
-
 # b). estimate is the sample mean or xbar
 samp <- skulls[1:30, 2:5]
 xbar <- colMeans(samp)
@@ -69,13 +58,12 @@ S1.xbar <- A. %*% S.xbar %*% t(A.)
 
 ```{r Q3}
 #A). QQ plots for the individual variables
-par(mfrow=c(2,3))
 
 par(mfrow=c(2,2))
-qqnorm(skulls[1:30, 2])
-qqnorm(skulls[1:30, 3])
-qqnorm(skulls[1:30, 4])
-qqnorm(skulls[1:30, 5])
+qqnorm(skulls[1:30, 2], main = "QQ-plot for mb Variable")
+qqnorm(skulls[1:30, 3], main = "QQ-plot for bh Variable")
+qqnorm(skulls[1:30, 4], main = "QQ-plot for bl Variable")
+qqnorm(skulls[1:30, 5], main = "QQ-plot for nh Variable")
 
 #B). Chi-square plot 
 chisquare.plot <- function(x, mark) {
@@ -102,12 +90,6 @@ chisquare.plot <- function(x, mark) {
 }
 
 chisquare.plot(skulls[1:30, 2:5], mark = 2)
-#Because this isn't a formal test, we can say that the assumption of normality is reasonable. 
-
-#C). New dataset, add in z-scores
-chisquare.plot(skulls[1:30, 2:5], mark = 2)
-
-#Because this isn't a formal test, we can say that the assumption of normality is reasonable. 
 
 #C). New dataset, add in z-scores and m-distance
 
@@ -117,23 +99,20 @@ d2 <- mahalanobis(c4_epoch[, 2:5], colMeans(c4_epoch[, 2:5]), S_c4)
 zs <- (c4_epoch[ ,2:5] - colMeans(c4_epoch[ ,2:5]))/(sqrt(var(c4_epoch[ ,2:5])))
 
 zscores <- function(x){
-  (x - colMeans(x))/(sqrt(var(x)))
+  (x - mean(x))/(sqrt(var(x)))
 }
 
-z <- zscores(c4_epoch[,2:5])
-names(z) <- c("Z1", "Z2", "Z3", "Z4")
+z1 <- zscores(c4_epoch[,2]) 
+z2 <- zscores(c4_epoch[,3])
+z3 <- zscores(c4_epoch[,4])
+z4 <- zscores(c4_epoch[,5])
+zs <- cbind(z1, z2, z3, z4) %>% round(2)
+d2 <- round(d2, 2)
 
-newdata <- cbind(c4_epoch, z, d2) 
+newdata <- cbind(c4_epoch, zs, d2) 
 fulldata <- newdata[order(newdata$d2, decreasing = TRUE),]
-
-# The data points with the highest distance values are observation 29 and observation 12. 
-# Because each zscore has a standard normal distribution, we should expect, 99% of the time 
-# that the zscore values should be within the interval [-2.57, 2.57]. As shown here, the zscore for the bl
-# and the bh variable are unusual, since they do not appear to be within the interval. 
-
-# Observation 12 
-# As shown in this observation, the zscores for the variable bl and nh look to be outside the interval, and thus
-# should be considered as an unusual point. 
+head(fulldata)
+knitr::kable(head(fulldata))
 
 # Part D). Shapiro Wilk Test
 
@@ -146,7 +125,7 @@ var_st <- rbind(mb_st$p.value, bh_st$p.value, bl_st$p.value, nh_st$p.value)
 rownames(var_st) <- c("mb", "bh", "bl", "nh")
 colnames(var_st) <- "Shapiro Test P-values"
 knitr::kable(var_st)
-# since the p-values are large, we can safely assume that the normality assumption for the data is plausible.
+help(skulls)
 ```
 
 
@@ -155,24 +134,19 @@ knitr::kable(var_st)
 set.seed(537)
 mean_vec <- c(1,2)
 cov_mat <- cbind(c(1,1), c(1,2))
-
-data_4 <- mvtnorm::rmvnorm(100, mean = mean_vec, sigma = cov_mat)
+data_4 <- rmnorm(100, mean = mean_vec, varcov = cov_mat)
 
 #Part B
 #Scatter Plot
-s_plot <- pairs(data_4, pch = 19)
+s_plot <- plot(data_4, pch = 19)
 
 # data ellipses
 e_plot <- dataEllipse(data_4,  pch = 19, col = c("steelblue", "#990000"),lty = 2, ellipse.label = c(0.5, 0.95), levels = c(0.5,
 0.95), fill = TRUE, fill.alpha = 0.1)
 
-# For the scatterplot, we should expect that the scatterplot conform to the same structure as the data ellipses, 
-# since the data are generated from a bivariate normal distribution. 
-
-# Part C
-
 # Part D
 newdat_4 <- data_4[,1] + data_4[,2]
+head(newdat_4, 6)
 hist(newdat_4, freq=FALSE)
 curve(dnorm(x, mean=3, sd = sqrt(5)), col=2, add=TRUE)
 ```
