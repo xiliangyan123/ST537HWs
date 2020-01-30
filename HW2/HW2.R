@@ -58,6 +58,52 @@ smCI.f <- simul.CI(n_data2) # Confidence intervals
 # in the measurements of carapaces for males and females. Females have a higher overall point estimate
 # for the mean. 
 
+
+## Problem 2 
+# reading in data
 college_data <- as.data.frame(read.table("C:/Users/xilia/OneDrive/Desktop/2020 - Spring/ST537/Datasets/T5-2.dat"))
 colnames(college_data) <- c("SSH", "Verbal", "Science")
+
+# Part A). Creating QQ-plots and pairwise scatterplots
+par(mfrow=c(2,2))
+qqnorm(college_data[,1])
+qqnorm(college_data[,2])
+qqnorm(college_data[,3])
+
+pairs(college_data)
+
+# the qq-plots look to have a straight, upward line. For the scatter plot, there are no unusual trends or shapes.
+# These features allow us to justify normality assumption. 
+
+
+
+# Part B). Denote mean vector by mu. Test H0: mu = [500,50,30]^T. Provide your conclusion. 
+# Mean vector mu equals:
+
+# number of variables and sample size
+p1 = ncol(college_data)
+n1 = nrow(college_data)
+# sample mean vector and sample covariance
+# matrix
+xbar1 = colMeans(college_data)
+S1 = cov(college_data)
+# value of mean under null
+mu_0 = c(500, 50, 30)
+# significance level
+alpha = 0.05
+# Test statistic and F critical value
+T2 <- n1 * (n1 - p1)/(p1 * (n1 - 1)) * t(xbar1 - mu_0) %*% solve(S1) %*% (xbar1 - mu_0)
+f.crit <- qf(alpha, p1, (n1 - p1), lower.tail = FALSE)
+data.frame(T2, f.crit)
+
+# Since the T-statistic is greater than the critical value, we reject H_0 and conclude that 
+# the mu vector is not equal to [500, 50, 30]^T
+
+# Part C). Create 95% Bonferroni confidence intervals for elements of mu
+bon.int <- c(xbar1 - qt(alpha/(2*p1), n1-1)*sqrt(diag(S1)/n1), xbar1 + qt(alpha/(2*p1), n1-1)*sqrt(diag(S1)/n1))
+
+
+
+
+# Problem 3: Contrasts
 
