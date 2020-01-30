@@ -70,7 +70,7 @@ qqnorm(college_data[,1])
 qqnorm(college_data[,2])
 qqnorm(college_data[,3])
 
-pairs(college_data)
+plot_scatter <- pairs(college_data, main = "Scatterplots for pairs of variables")
 
 # the qq-plots look to have a straight, upward line. For the scatter plot, there are no unusual trends or shapes.
 # These features allow us to justify normality assumption. 
@@ -100,10 +100,27 @@ data.frame(T2, f.crit)
 # the mu vector is not equal to [500, 50, 30]^T
 
 # Part C). Create 95% Bonferroni confidence intervals for elements of mu
-bon.int <- c(xbar1 - qt(alpha/(2*p1), n1-1)*sqrt(diag(S1)/n1), xbar1 + qt(alpha/(2*p1), n1-1)*sqrt(diag(S1)/n1))
-
-
+bon.int0 <- cbind(xbar1 - qt(alpha/(2*p1), n1-1)*sqrt(diag(S1)/n1), xbar1 + qt(alpha/(2*p1), n1-1)*sqrt(diag(S1)/n1))
+bon.int <- cbind(xbar1, bon.int0)
+colnames(bon.int) <- c("Estimate", "Upper", "Lower")
+bon.int
 
 
 # Problem 3: Contrasts
+dog_data <- as.matrix(read.table("C:/Users/xilia/OneDrive/Desktop/2020 - Spring/ST537/Datasets/T6-2.dat"))
 
+# Part A). Write another contrast matrix different from the ones given. 
+
+new_mat <- rbind(c(0, -1, 0))
+
+# Part B). From contrast matrix in part A, test H_0 and compare results to lecture notes. Explain similarities, differences. 
+
+# Part C). Separately test for interaction effect, main effect of halothane, main effect of CO2, and interpret results. 
+
+# Part D). 
+
+# Part E). Test hypothesis in (d) and interpret the results. 
+
+
+
+## Problem 4: More Contrasts. 
