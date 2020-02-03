@@ -66,9 +66,9 @@ colnames(college_data) <- c("SSH", "Verbal", "Science")
 
 # Part A). Creating QQ-plots and pairwise scatterplots
 par(mfrow=c(2,2))
-qqnorm(college_data[,1])
-qqnorm(college_data[,2])
-qqnorm(college_data[,3])
+qqnorm(college_data[,1], main = "Q-Q plot for SSH variable")
+qqnorm(college_data[,2], main = "Q-Q plot for Verbal variable")
+qqnorm(college_data[,3], main = "Q-Q plot for Science")
 dev.off()
 plot_scatter <- pairs(college_data, main = "Scatterplots for pairs of variables")
 
