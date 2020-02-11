@@ -1,0 +1,114 @@
+---
+title: "ST537HW3"
+author: "Michael Yan"
+date: "2/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+setwd("C:/Users/xilia/OneDrive/Desktop/2020 - Spring/ST537/Homeworks/ST537HWs/HW3")
+```
+
+```{r Q1}
+library(ICSNP)
+turtle_dat <- read.table("T6-9.dat")
+colnames(turtle_dat) <- c("Length", "Width", "Height", "Gender")
+head(turtle_dat)
+
+#A). Testing for equality of mean measurements between 2 genders
+turtle_m <- turtle_dat[turtle_dat$Gender == "male", 1:3] %>% colMeans()
+turtle_f <- turtle_dat[turtle_dat$Gender == "female", 1:3] %>% colMeans()
+
+turtle_mf <- turtle_f - turtle_m
+test <- HotellingsT2(turtle_mf) 
+# Looks like the mean measurements between the two genders are not equal, based on p-value of 0.04169. 
+
+#B). Creating Bonferroni intervals for each component of the difference of the mean vector
+
+# number of variables and sample size
+p1 = ncol(turtle_dat)
+n1 = nrow(turtle_dat)
+# sample mean vector and sample covariance
+# matrix
+xbar1 = colMeans(turtle_dat[ ,1:3])
+S1 = cov(turtle_dat[, 1:3])
+# significance level
+alpha = 0.05
+
+# Create 95% Bonferroni confidence intervals for elements of mu
+bon.int0 <- cbind(xbar1 - qt(alpha/(2*p1), n1-1)*sqrt(diag(S1)/n1), xbar1 + qt(alpha/(2*p1), n1-1)*sqrt(diag(S1)/n1))
+bon.int <- cbind(xbar1, bon.int0)
+colnames(bon.int) <- c("Estimate", "Upper", "Lower")
+bon.int
+```
+
+```{r Q2}
+library(car)
+library(emmeans)
+pott_dat <- as.matrix(Pottery[,-1])
+site <- Pottery[,1]
+table(site)
+str(pott_dat)
+#A). Mean vector of each site (group) and overall mean vector
+# Overall Mean vector is: 
+o_meanvec <- colMeans(pott_dat)
+
+# Individual group mean vectors:
+site_Ll <- Pottery %>% filter(Pottery$Site=="Llanedyrn")
+muvec_LI <- colMeans(site_Ll[,2:6])
+
+site_isle <- Pottery %>% filter(Pottery$Site=="IsleThorns")
+muvec_isle <- colMeans(site_isle[,2:6])
+
+site_cald <- Pottery %>% filter(Pottery$Site=="Caldicot")
+muvec_cald <- colMeans(site_cald[,2:6])
+
+site_ash <- Pottery %>% filter(Pottery$Site=="AshleyRails")
+muvec_ash <- colMeans(site_ash[,2:6])
+
+#B). Perform a MANOVA to determine whether group means are equal or not
+
+#Site is the grouping factor; each row in pott_dat should correspond to the same row of site. 
+out <- manova(pott_dat ~ site)
+
+summary.aov(out) # Clearly, we see here that the group means are not equal to each other. 
+
+#C). Investigate which coponents are different using pair-wise comparisons
+Almeans <- emmeans(out, "site", weights = c(1, 0, 0, 0, 0))
+Femeans <- emmeans(out, "site", weights = c(0, 1, 0, 0, 0))
+Mgmeans <- emmeans(out, "site", weights = c(0, 0, 1, 0, 0))
+Cameans <- emmeans(out, "site", weights = c(0, 0, 0, 1, 0))
+Nameans <- emmeans(out, "site", weights = c(0, 0, 0, 0, 1))
+
+p2 <- ncol(pott_dat) # Number of variables
+g2 <- 4 # Number of groups for site
+
+alpha.old <- 0.05
+nc <- p2*g2*(g2-1)/2 # Number of comparisons
+alpha.new <- alpha.old/nc
+
+# Pairwise differences for Al variable
+Al_cont <- contrast(Almeans, "pairwise")
+# Confidence levels - not containing zero means significant. 
+aa <- confint(Al_cont, level = 1-alpha.new, adj= "none") %>% print()
+
+Fe_cont <- contrast(Femeans, "pairwise")
+bb <- confint(Fe_cont, level = 1-alpha.new, adj= "none") %>% print()
+
+Mg_cont <- contrast(Mgmeans, "pairwise")
+cc <- confint(Mg_cont, level = 1-alpha.new, adj= "none") %>% print()
+
+Ca_cont <- contrast(Cameans, "pairwise")
+dd <- confint(Ca_cont, level = 1-alpha.new, adj= "none") %>% print()
+
+Na_cont <- contrast(Nameans, "pairwise")
+dd <- confint(Na_cont, level = 1-alpha.new, adj= "none") %>% print()
+
+#d). Assumptions on the population/sample in this analysis. 
+# The main assumptions for this population are that:
+# - Each population is multivariate normal
+# - each group/population has different means but same covariance matrix Sigma
+# Samples are mutually independent. 
+```
