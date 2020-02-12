@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(dplyr)
 setwd("C:/Users/xilia/OneDrive/Desktop/2020 - Spring/ST537/Homeworks/ST537HWs/HW3")
 ```
 
@@ -111,4 +112,58 @@ dd <- confint(Na_cont, level = 1-alpha.new, adj= "none") %>% print()
 # - Each population is multivariate normal
 # - each group/population has different means but same covariance matrix Sigma
 # Samples are mutually independent. 
+```
+
+
+```{r Q3}
+# Read in corn dataset 
+corn_data <- read.table("T6-17.dat", header = F)
+colnames(corn_data) <- c("Location", "Variety", "Yield", "SdMatKer", "Size")
+
+# Part A). Perform a Manova on the dataset and test for location-variety interaction effect, variety effect, and location effect.
+# Interpret the results. 
+
+corn_data$Variety <- as.factor(corn_data$Variety)
+corn_data$Location <- as.factor(corn_data$Location)
+
+# Perform manova :
+resp <- as.matrix(corn_data[, 3:5])
+fit <- lm(resp ~ Variety * Location, data = corn_data)
+m.model <- manova(fit)
+
+summary.aov(m.model)
+
+# Interpretations:
+# The variety and interaction term look to be siginificant for the Yield response
+# The Variety and interaction term look to be significant for the sound mature kernels response
+# The Variety term looks to be the only significant term in this model. 
+
+# B). Investigate whether location-variety interaction show up for some variables but not others
+# Do this by running 3 univariate ANOVA models. 
+
+fit2 <- lm(Yield ~ Variety * Location, data = corn_data) %>% anova() %>% print()
+
+fit3 <- lm(SdMatKer ~ Variety * Location, data = corn_data) %>% anova() %>% print()
+
+fit4 <- lm(Size ~ Variety * Location, data = corn_data) %>% anova() %>% print()
+
+# Looks like interaction is significant for yield and sound mature kernels response variables. 
+
+# C). Explain what the location-variety interaction effect means:
+# The location-variety interaction effect explains how the effect of location and variety are correlated together in affecting the response. 
+# Together, we ask if a term combining location and variety together will influence the response variable 
+
+# D). Consider only location 2
+
+new_data <- corn_data %>% group_by(Location, Variety) %>% summarize(means = mean(Size), sds = sd(Size))
+new_data2 <- new_data[4:6, ]
+
+# Code to group and average by replicates
+# data.frame(
+#   var1=rep(rep(c('AA.1', 'AA.2', 'AA.3', 'BB.1', 'BB.2', 'BB.3'), each=3), 2),
+#   var2=rep(c('X', 'Y'), each=18),
+#   var3=sample(20:40, 36, replace=TRUE)
+# )
+
+# E). Estimate mean differences 
 ```
