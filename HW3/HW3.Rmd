@@ -51,7 +51,7 @@ library(emmeans)
 pott_dat <- as.matrix(Pottery[,-1])
 site <- Pottery[,1]
 table(site)
-str(pott_dat)
+
 #A). Mean vector of each site (group) and overall mean vector
 # Overall Mean vector is: 
 o_meanvec <- colMeans(pott_dat)
@@ -116,6 +116,7 @@ dd <- confint(Na_cont, level = 1-alpha.new, adj= "none") %>% print()
 
 
 ```{r Q3}
+library(emmeans)
 # Read in corn dataset 
 corn_data <- read.table("T6-17.dat", header = F)
 colnames(corn_data) <- c("Location", "Variety", "Yield", "SdMatKer", "Size")
@@ -155,15 +156,60 @@ fit4 <- lm(Size ~ Variety * Location, data = corn_data) %>% anova() %>% print()
 
 # D). Consider only location 2
 
-new_data <- corn_data %>% group_by(Location, Variety) %>% summarize(means = mean(Size), sds = sd(Size))
-new_data2 <- new_data[4:6, ]
+new_data <- corn_data %>% group_by(Location, Variety) %>% summarize(means = mean(Size), sds = sd(Size)) %>% print()
+new_data2 <- new_data[4:6, ] %>% print()
 
-# Code to group and average by replicates
-# data.frame(
-#   var1=rep(rep(c('AA.1', 'AA.2', 'AA.3', 'BB.1', 'BB.2', 'BB.3'), each=3), 2),
-#   var2=rep(c('X', 'Y'), each=18),
-#   var3=sample(20:40, 36, replace=TRUE)
-# )
+new_mat <- as.matrix(new_data2)
+Variety <- as.factor(new_mat[,2])
+Means <- as.numeric(new_mat[,3])
+Sds <- as.numeric(new_mat[,4])
+Location <- as.factor(new_mat[,1])
 
 # E). Estimate mean differences 
+mod_mu <- lm(Means ~ Variety)
+mod_sd <- lm(Sds ~ Variety)
+
+mu_fit <- emmeans(mod_mu, "Variety")
+mu_diffs <- pairs(mu_fit) %>% print()
+
+sd_fit <- emmeans(mod_sd, "Variety")
+sd_diffs <- pairs(sd_fit) %>% print()
+
+diff_mat <- data.frame(cbind(mu_diffs$estimate, sd_diffs$estimate))
+names(diff_mat) <- c("Means", "SEs")
+
+Contrasts <- sd_diffs$contrast
+cont_mat <- cbind(Contrasts, diff_mat) %>% print()
+
+# C). Bonferroni Intervals 
+# Number of response variables 
+p <- 2
+
+# Sample Size 
+n <- 6
+
+# Factor 1 Levels
+g <- 3
+
+# Factor 2 Levels
+b <- 1
+
+# Alpha 
+alpha <- 0.05
+t.crit <- qt( alpha/(p*g*(g-1)),df = g*b*(n-1),lower.tail = FALSE)
+t.crit
+
+CI_var5 <- -7.30 + c(-1,1)*t.crit*3.394112
+CI_var6 <- -16.15 + c(-1,1) * t.crit*6.293250
+CI_var8 <- -8.85 + c(-1,1) *t.crit*2.899138
+
+bon.CI <- rbind(CI_var5, CI_var6, CI_var8)
+colnames(bon.CI) <- c("Lower", "Upper")
+bon.CI
+
+# In our bonferroni interval we see that larger values exist in variety 5. This allows us to say that variety 5 is better in terms of size as compared to variety 6 for example. 
+```
+
+```{r Q4}
+# Problem 4
 ```
