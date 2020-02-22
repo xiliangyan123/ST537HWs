@@ -75,7 +75,10 @@ comms <- cbind(communialities.n, communialities.v)
 colnames(comms) <- c("none", "varimax")
 comms
 
-# Finding uniquenesses 
+# Satisfaction of uniquenesses and communialities
+# We originally used a two-factor model for our model fit. To determine if this model was a good fit for the data, the communialities for each variable should be close to 1. However, we see here that the communialities are not close to 1, and thus, we can argue that the communialities are not satisfactory. 
+
+# For uniquenesses, we should expect that these values be small. We can calculate the uniquenesses by doing: uniquenesses = 1 - communialities. We see from our output that having communialities subtracted from 1 is quite large, around 50% +. Thus, uniquenesses are not satisfactory. 
 
 ```
 
