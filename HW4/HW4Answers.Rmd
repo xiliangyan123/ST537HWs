@@ -1,19 +1,39 @@
 ---
-title: "Homework 4"
-author: "Michael Yan"
-date: "2/21/2020"
-output: pdf_document
+title: "ST537/437 HW3"
+author: 
+- Michael Yan 
+date: "Date Submitted: 02/22/2020"
+output:
+  pdf_document:
+    fig_caption: yes
+    highlight: pygments
+    keep_tex: yes
+    number_sections: yes
+    toc: yes
+header-includes: 
+  - \usepackage{float}
+  - \usepackage{longtable}
 ---
+\centering
+
+\raggedright
+
+\clearpage
+
+\tableofcontents
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(warning = FALSE)
 knitr::opts_chunk$set(message = FALSE)
 library(GGally)
+library(knitr)
 library(tidyverse)
 ```
 
-```{r cars}
+# Problem 1 - Harman23.cor Data 
+
+```{r Q1}
 #Question 1A). 
 dat <- Harman23.cor$cov
 
@@ -40,46 +60,66 @@ pca.sum$importance[, c(1:2)]
 # for the first PC, we see that the height, armspan, and forearm explain most for our dependent variable, whereas the second PC, we see that the chest.width and the chest.girth explain most of the variation for our dependent variable. 
 ```
 
+## Problem 1 Answers: 
+#A). Please see above output for correlation matrix. For the patterns that we see in the correlation plot, we see that many variables are correlated with each other. For instance, we see patterns such as armspan and height being highly correlated with each other, which we will need to consider for when making inferences. 
+
+#B). PCA Loadings - Please see the above output for the loadings and first 2 PCs
+
+#C). The Total variation captured by the first PC is 85.28$\%$ and the total variation captured by the second PC is 5.987$\%$, The total Variation that is captured by the first two PCs is 91.267$\%$
+
+#D). Interpretation of the 
+
 ```{r Q2}
 library(sem)
 library(corrplot)
 library(psych)
+library(GPArotation)
 lt <- readMoments("EverittEx5.5.txt", diag = TRUE) %>% print()
 R <- (lt + t(lt)) - diag(1, 6)
 colnames(R) <- c("French", "English", "History", "Arithmetic", "Algebra", "Geometry")
 rownames(R) <- c("French", "English", "History", "Arithmetic", "Algebra", "Geometry")
 R
 
-# out1 <- fa(R, nfactors = 2, n.obs = nrow(R), fm = "ml", rotate = "none", scores = "regression") %>% print()
+# Are two factors sufficient or Not?
 fa.parallel(R, n.iter = 100, fm = "ml", fa = "fa")
-
 fa.mle <- fa(R, nfactors = 2, rotate = "none", fm = "ml", n.obs = 220)
+fa.varimax <- fa(R, nfactors = 2, rotate = "varimax", fm = "ml", n.obs = 220)
+# Based on the parallel analysis, we notice that there is still a noticeable difference, when factors = 2.
+# We find that number of factors = 2 may not be enough to fit the data. 
 
-# TLI <- c(fa.mle[[1]]$TLI, fa.mle[[2]]$TLI, fa.mle[[3]]$TLI)
-# names(TLI) <- c("k = 1", "k = 2", "k = 3")
-# TLI
-
-fa.varimax <- fa(R, nfactors = 2, rotate = "varimax", fm = "ml", 220)
-
-# Looks like 3 factors will suffice under the tucker-lewis index. 
-## Communalities and uniqueness
-loadings.n <- fa.mle$loadings %>% print()
-loadings.v <- fa.varimax$loadings %>% print()
+# Satisfaction of uniquenesses and communialities
+# Loadings
+loadings.n <- fa.mle$loadings
+loadings.v <- fa.varimax$loadings
 loadings <- cbind(loadings.n, loadings.v)
 colnames(loadings) <- c("None F1","None F2", "Varimax F1", "Varimax F2" )
 loadings
 
+# Communialities 
 comms.n<- rowSums(fa.mle$loadings^2) 
 comms.v <- rowSums(fa.varimax$loadings^2)
-comms <- cbind(communialities.n, communialities.v)
-colnames(comms) <- c("none", "varimax")
+comms <- cbind(comms.n, comms.v)
+colnames(comms) <- c("None", "Varimax")
 comms
 
-# Satisfaction of uniquenesses and communialities
 # We originally used a two-factor model for our model fit. To determine if this model was a good fit for the data, the communialities for each variable should be close to 1. However, we see here that the communialities are not close to 1, and thus, we can argue that the communialities are not satisfactory. 
 
 # For uniquenesses, we should expect that these values be small. We can calculate the uniquenesses by doing: uniquenesses = 1 - communialities. We see from our output that having communialities subtracted from 1 is quite large, around 50% +. Thus, uniquenesses are not satisfactory. 
 
-```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# Interpretation of the factor loadings, exploring a few rotations if needed.
+
+# Based on the factor loadings, it seems that factor 1 with no rotation and factor 1 with the varimax rotation are strong influences for the arithmetic and the alegebra variables. As for factor 2 with varimax rotation and without rotation, we find that those have a rather weaker influence on the geometry, algebra, and arithmetic variable. 
+
+
+# Comment on whether factor scores can be computed here or not
+par(mfrow = c(2,3))
+
+fa.quartimax <- fa(R, nfactors = 2, n.obs = 220, fm = "ml", rotate = "quartimax")
+
+fa.diagram(fa.mle, cut = 0.20, simple = FALSE, main = "no rotation")
+fa.diagram(fa.varimax, cut = 0.20, simple = FALSE, main = "Varimax rotation")
+fa.diagram(fa.quartimax, cut = 0.20, simple = FALSE, main = "Quartimax rotation")
+
+# Based on the rotations, we find it difficult to interpret the fixed set of loadings. If we wish to predict and interpret for the factor scores, we would probably need more than 2 factors. 
+```
