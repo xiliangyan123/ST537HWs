@@ -7,13 +7,76 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+library(GGally)
+library(tidyverse)
 ```
 
 ```{r cars}
-summary(cars)
+#Question 1A). 
+dat <- Harman23.cor$cov
+
+#a). Provide a plot to visualize the 
+corrpt <- ggcorr(dat, label = TRUE, label.size = 0, label_round = 2) %>% print()
+
+# From the patterns we see in the correlation plot, we see that many of the variables are correlated with each other. There is a lot of multicollinearity. 
+
+#b). Perform PCA on this data and retain the first two pcs. Report the loadings
+pca1 <- prcomp(dat) %>% print()
+round(pca1$rotation[, 1:2], 3)
+
+#c). How much total variation is captured by each of the two first PCs? How much of the total variation is captured by the 2 PCs together? 
+
+pca.sum <- summary(pca1)
+pca.sum$importance[, c(1:2)]
+
+# Total variation captured by each: PC1 - 85.28%, PC2 - 5.987%
+# Total variation captured by both: PC1 + PC2 = 91.267%
+
+#d). Interpret the first 2 PCs as best as you can:
+# The first 2 pcs can be interpreted as the summaries of physical measurements on girls between ages of 7 and 17. For the first PC, we see that 
+
+# for the first PC, we see that the height, armspan, and forearm explain most for our dependent variable, whereas the second PC, we see that the chest.width and the chest.girth explain most of the variation for our dependent variable. 
 ```
 
-```{r pressure, echo=FALSE}
+```{r Q2}
+library(sem)
+library(corrplot)
+library(psych)
+lt <- readMoments("EverittEx5.5.txt", diag = TRUE) %>% print()
+R <- (lt + t(lt)) - diag(1, 6)
+colnames(R) <- c("French", "English", "History", "Arithmetic", "Algebra", "Geometry")
+rownames(R) <- c("French", "English", "History", "Arithmetic", "Algebra", "Geometry")
+R
+
+# out1 <- fa(R, nfactors = 2, n.obs = nrow(R), fm = "ml", rotate = "none", scores = "regression") %>% print()
+fa.parallel(R, n.iter = 100, fm = "ml", fa = "fa")
+
+fa.mle <- fa(R, nfactors = 2, rotate = "none", fm = "ml", n.obs = 220)
+
+# TLI <- c(fa.mle[[1]]$TLI, fa.mle[[2]]$TLI, fa.mle[[3]]$TLI)
+# names(TLI) <- c("k = 1", "k = 2", "k = 3")
+# TLI
+
+fa.varimax <- fa(R, nfactors = 2, rotate = "varimax", fm = "ml", 220)
+
+# Looks like 3 factors will suffice under the tucker-lewis index. 
+## Communalities and uniqueness
+loadings.n <- fa.mle$loadings %>% print()
+loadings.v <- fa.varimax$loadings %>% print()
+loadings <- cbind(loadings.n, loadings.v)
+colnames(loadings) <- c("None F1","None F2", "Varimax F1", "Varimax F2" )
+loadings
+
+comms.n<- rowSums(fa.mle$loadings^2) 
+comms.v <- rowSums(fa.varimax$loadings^2)
+comms <- cbind(communialities.n, communialities.v)
+colnames(comms) <- c("none", "varimax")
+comms
+
+# Finding uniquenesses 
+
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
